@@ -5,29 +5,18 @@ const bodyParser = require('body-parser');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 var knex = require('../knex');
-const bcrypt = require('bcrypt');
 
 router.post('/organizations', function(req,res,next){
   var newOrg = req.body;
-  var insertedOrg = {};
-  if (!newOrg.email) {
-    res.setHeader('Content-Type', 'text/plain');
-    return res.status(400).send('Email must not be blank');
-  }
-
-  if (!newOrg.password || newOrg.password.length < 8) {
-    res.setHeader('Content-Type', 'text/plain');
-    return res.status(400).send('Password must be at least 8 characters long');
-  }
-
   knex('organizations')
-  .select('email')
-  .where('email', newOrg.email)
+  .select('id')
+  .where('name', newOrg.name)
   .then(function(data){
     if(data.length > 0){
       res.setHeader('Content-Type', 'text/plain');
       return res.status(400).send('Email already exists');
     }
+
     bcrypt.hash(newOrg.password, 10, function(err, hash) {
       if (err) {
         console.error(err);
